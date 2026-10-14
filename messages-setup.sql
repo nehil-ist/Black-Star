@@ -19,10 +19,10 @@ create policy "anyone can send"
 create policy "owner can read"
   on public.messages for select
   to authenticated
-  using ((auth.jwt() ->> 'email') = 'you@example.com');
+  using ((auth.jwt() ->> 'email') = 'nehiljordan100@example.com');
 
 -- Only the owner can delete messages.
 create policy "owner can delete"
   on public.messages for delete
   to authenticated
-  using ((auth.jwt() ->> 'email') = 'you@example.com');
+  using ((auth.jwt() ->> 'email') = 'nehiljordan100@example.com');
