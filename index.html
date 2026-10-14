@@ -373,6 +373,15 @@
     .chat { animation: none; transition: none; }
   }
 
+  .filters { max-width: 760px; margin: 0 auto 2.2rem; display: flex; gap: 1.4rem; }
+  .filters button {
+    background: none; border: 0; border-bottom: 1px solid transparent;
+    color: var(--smoke); font: inherit; cursor: pointer; padding: 0 0 2px;
+  }
+  .filters button:hover { color: var(--ash); }
+  .filters button[aria-pressed="true"] { color: var(--ash); border-bottom-color: var(--blood); }
+  .qa .who { display: block; color: var(--smoke); font-size: .88rem; margin-bottom: .5rem; }
+
   @media (max-width: 800px) {
     .hero { grid-template-columns: 1fr; padding-bottom: 3rem; }
     .art { order: -1; max-width: 520px; margin: 0 auto; }
@@ -456,7 +465,7 @@
       <p class="status" id="msgStatus" role="status" aria-live="polite"></p>
     </form>
     <div class="replies-wrap">
-      <button class="tab" type="button" id="repliesTab" aria-haspopup="dialog"><span id="repliesTitle">Replies</span><svg class="expand" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+      <button class="tab" type="button" id="repliesTab" aria-haspopup="dialog"><span id="repliesTitle">Archive</span><svg class="expand" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
     </div>
   </section>
 
@@ -484,10 +493,16 @@
 
 <dialog class="replies" id="repliesDialog" aria-labelledby="repliesHeading">
   <div class="replies-head">
-    <h2 id="repliesHeading">Replies</h2>
+    <h2 id="repliesHeading">Archive</h2>
     <button class="close" type="button" id="repliesClose">Close</button>
   </div>
-  <div class="replies-body"><div class="replies-list" id="repliesList"></div></div>
+  <div class="replies-body">
+    <div class="filters" role="group" aria-label="Filter messages">
+      <button type="button" data-f="all" aria-pressed="true">All</button>
+      <button type="button" data-f="replied" aria-pressed="false">Replied</button>
+    </div>
+    <div class="replies-list" id="repliesList"></div>
+  </div>
 </dialog>
 
 <a class="send float-msg" id="floatMsg" href="#messages">Leave a message</a>
@@ -729,33 +744,54 @@
   var repliesTab = $('repliesTab'), repliesTitle = $('repliesTitle'), repliesDialog = $('repliesDialog'),
       repliesList = $('repliesList'), repliesClose = $('repliesClose');
 
+  var archiveRows = [], archiveFilter = 'all';
+
   function loadReplies() {
     if (!ready) return;
-    sb('/rest/v1/messages?select=id,body,reply,replied_at&reply=not.is.null&order=replied_at.desc&limit=100')
+    sb('/rest/v1/messages?select=id,body,created_at,reply,replied_at&order=created_at.desc&limit=200')
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(renderReplies)
+      .then(function (rows) { archiveRows = rows; renderReplies(); })
       .catch(function () {});
   }
 
-  function renderReplies(rows) {
-    repliesTitle.textContent = 'Replies (' + rows.length + ')';
+  function fmtDate(s) { return new Date(s).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }); }
+
+  function renderReplies() {
+    var replied = archiveRows.filter(function (m) { return m.reply; });
+    repliesTitle.textContent = 'Archive (' + archiveRows.length + ')';
+    document.querySelectorAll('.filters button').forEach(function (b) {
+      var f = b.getAttribute('data-f');
+      b.setAttribute('aria-pressed', String(f === archiveFilter));
+      b.textContent = (f === 'all' ? 'All (' + archiveRows.length : 'Replied (' + replied.length) + ')';
+    });
+    var rows = archiveFilter === 'replied' ? replied : archiveRows;
     repliesList.textContent = '';
     if (!rows.length) {
-      var e = document.createElement('p'); e.className = 'replies-empty'; e.textContent = 'No replies yet.';
+      var e = document.createElement('p'); e.className = 'replies-empty';
+      e.textContent = archiveFilter === 'replied' ? 'No replies yet.' : 'No messages yet.';
       repliesList.appendChild(e);
       return;
     }
     rows.forEach(function (m) {
       var qa = document.createElement('article'); qa.className = 'qa';
+      var who = document.createElement('span'); who.className = 'who'; who.textContent = chatLabel(m.id) + ', ' + fmtDate(m.created_at);
       var q = document.createElement('p'); q.className = 'q'; q.textContent = m.body;
-      var a = document.createElement('p'); a.className = 'a'; a.textContent = m.reply;
-      var t = document.createElement('time'); t.dateTime = m.replied_at; t.textContent = 'Replied ' + new Date(m.replied_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-      qa.appendChild(q); qa.appendChild(a); qa.appendChild(t);
+      qa.appendChild(who); qa.appendChild(q);
+      if (m.reply) {
+        var a = document.createElement('p'); a.className = 'a'; a.textContent = m.reply;
+        var t = document.createElement('time'); t.dateTime = m.replied_at; t.textContent = 'Replied ' + fmtDate(m.replied_at);
+        qa.appendChild(a); qa.appendChild(t);
+      }
       repliesList.appendChild(qa);
     });
   }
 
+  document.querySelectorAll('.filters button').forEach(function (b) {
+    b.addEventListener('click', function () { archiveFilter = b.getAttribute('data-f'); renderReplies(); });
+  });
+
   repliesTab.addEventListener('click', function () {
+    loadReplies();
     if (repliesDialog.showModal) { repliesDialog.showModal(); } else { repliesDialog.setAttribute('open', ''); }
     document.documentElement.classList.add('lock');
     repliesDialog.querySelector('.replies-body').scrollTop = 0;
