@@ -363,7 +363,11 @@
     display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere;
   }
   @keyframes chatIn { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
-  @media (max-width: 1099px) { .stream { display: none; } }
+  /* Phones and small windows: a compact stream above the message button */
+  @media (max-width: 1099px) {
+    .stream { top: auto; bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); width: min(78vw, 300px); max-height: 36vh; }
+    html.typing .stream { visibility: hidden; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .dot { animation: none; }
     .chat { animation: none; transition: none; }
@@ -811,6 +815,10 @@
   }
   pollChat(true);
   setInterval(function () { if (!document.hidden) pollChat(false); }, 5000);
+
+  // Hide the stream while someone is typing so it never covers the box
+  msgText.addEventListener('focus', function () { document.documentElement.classList.add('typing'); });
+  msgText.addEventListener('blur', function () { document.documentElement.classList.remove('typing'); });
 </script>
 </body>
 </html>
