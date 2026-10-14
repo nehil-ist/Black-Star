@@ -264,6 +264,111 @@
     .drawer, .tab .chev, .send, .tab { transition: none; }
   }
 
+  /* ---------- Public replies (full-screen) ---------- */
+  .replies-wrap { max-width: 560px; margin-top: 2.5rem; }
+  .tab .expand { flex: none; }
+  dialog.replies {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+    background: var(--black); color: var(--ash);
+  }
+  dialog.replies::backdrop { background: var(--black); }
+  dialog.replies[open] { display: flex; flex-direction: column; animation: expandIn .28s ease-out; }
+  @keyframes expandIn { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+  html.lock { overflow: hidden; }
+  .replies-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    padding: calc(1.1rem + env(safe-area-inset-top, 0px)) var(--pad) 1.1rem;
+    border-bottom: 1px solid var(--smoke);
+  }
+  .replies-head h2 { margin: 0; font-family: "Shippori Mincho", serif; font-weight: 700; font-size: 1.6rem; letter-spacing: .04em; }
+  .close {
+    background: none; border: 0; border-bottom: 1px solid var(--smoke);
+    color: var(--ash); font: inherit; cursor: pointer; padding: 0 0 2px; transition: border-color .15s;
+  }
+  .close:hover { border-bottom-color: var(--blood); }
+  .replies-body { flex: 1; overflow: auto; padding: 2.5rem var(--pad) calc(3rem + env(safe-area-inset-bottom, 0px)); }
+  .replies-list { max-width: 760px; margin: 0 auto; display: grid; gap: 3.2rem; }
+  .qa .q {
+    margin: 0; white-space: pre-wrap; overflow-wrap: anywhere;
+    font-family: "Shippori Mincho", serif; font-weight: 500;
+    font-size: clamp(1.2rem, 2.4vw, 1.5rem); line-height: 1.6;
+  }
+  .qa .a { margin: 1rem 0 0; padding-left: 1.2rem; border-left: 2px solid var(--blood); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .qa time { display: block; margin-top: .7rem; color: var(--smoke); font-size: .88rem; }
+  .replies-empty { max-width: 760px; margin: 0 auto; color: var(--smoke); }
+
+  /* Owner: reply editor inside each message */
+  .msg-head { display: flex; align-items: baseline; gap: .8rem; margin-bottom: .3rem; }
+  .msg-head time { display: inline; margin: 0; }
+  .tag { color: var(--ash); font-size: .8rem; border: 1px solid var(--smoke); padding: 0 .45rem; }
+  .reply-box {
+    width: 100%; margin-top: .9rem;
+    background: var(--black); color: var(--ash);
+    border: 1px solid var(--smoke); border-radius: 0;
+    padding: .6rem .8rem; font: inherit; font-size: .95rem; line-height: 1.6; resize: vertical;
+  }
+  .reply-box:focus-visible { outline: 2px solid var(--blood); outline-offset: 2px; }
+  .msg-actions { display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: center; margin-top: .7rem; }
+  .msg-actions button { margin-top: 0; }
+  .msg-actions .note { color: var(--smoke); font-size: .88rem; }
+  @media (prefers-reduced-motion: reduce) {
+    dialog.replies[open] { animation: none; }
+  }
+
+  /* ---------- Easy-to-find message button ---------- */
+  .cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 1.8rem; }
+  .cta { display: inline-block; text-decoration: none; text-align: center; }
+  .cta-note { color: var(--smoke); font-size: .92rem; }
+  .bar nav a.nav-cta { color: var(--ash); border-bottom: 1px solid var(--blood); }
+  .float-msg {
+    position: fixed; right: var(--pad); bottom: calc(1.2rem + env(safe-area-inset-bottom, 0px)); z-index: 25;
+    display: inline-block; text-decoration: none;
+    font-size: 1rem; padding: .6rem 1.3rem;
+    box-shadow: 0 0 0 1px var(--black), 0 6px 24px rgba(0, 0, 0, .8);
+    visibility: hidden; opacity: 0; transform: translateY(1rem);
+    transition: opacity .2s, transform .2s, visibility 0s .2s, background .15s, color .15s, border-color .15s;
+  }
+  .float-msg.show { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
+  @media (prefers-reduced-motion: reduce) { .float-msg { transition: none; } }
+
+  /* ---------- Live message stream ---------- */
+  .stream {
+    position: fixed; right: var(--pad); top: 5rem; bottom: 6rem;
+    width: min(300px, 26vw); z-index: 15;
+    display: flex; flex-direction: column; gap: .7rem;
+    pointer-events: none;
+  }
+  .stream-head { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; color: var(--ash); font-size: .85rem; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blood); animation: pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+  .stream-list {
+    flex: 1; min-height: 0; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end; gap: .6rem;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 30%);
+            mask-image: linear-gradient(to bottom, transparent 0, #000 30%);
+  }
+  .chat {
+    flex: none;
+    background: rgba(0, 0, 0, .8);
+    border: 1px solid var(--smoke);
+    padding: .55rem .8rem;
+    animation: chatIn .45s ease-out;
+    transition: opacity .6s ease;
+  }
+  .chat.out { opacity: 0; }
+  .chat .who { display: block; color: var(--smoke); font-size: .8rem; }
+  .chat .txt {
+    margin: 0; color: var(--ash); font-size: .95rem; line-height: 1.45;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere;
+  }
+  @keyframes chatIn { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+  @media (max-width: 1099px) { .stream { display: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .dot { animation: none; }
+    .chat { animation: none; transition: none; }
+  }
+
   @media (max-width: 800px) {
     .hero { grid-template-columns: 1fr; padding-bottom: 3rem; }
     .art { order: -1; max-width: 520px; margin: 0 auto; }
@@ -286,7 +391,7 @@
   <a class="who" href="#top">Black Star</a>
   <nav aria-label="Sections">
     <a href="#about">About</a>
-    <a href="#messages">Messages</a>
+    <a class="nav-cta" href="#messages">Messages</a>
   </nav>
 </header>
 
@@ -296,6 +401,10 @@
       <h1><span>Black</span><span>Star</span></h1>
       <p>By Jordan. A quiet corner of the internet.</p>
       <p>Dark, still, and unhurried.</p>
+      <div class="cta-row">
+        <a class="send cta" id="ctaMsg" href="#messages">Leave a message</a>
+        <span class="cta-note">Anonymous. No account needed.</span>
+      </div>
     </div>
     <div class="art">
       <svg viewBox="0 0 600 600" role="img" aria-label="A black eclipse ringed by a thin red crescent, surrounded by ink hatching">
@@ -333,7 +442,7 @@
   <section class="block" id="messages" aria-labelledby="messages-h">
     <div class="block-head"><h2 id="messages-h">Messages</h2></div>
     <form class="msg-form" id="msgForm" novalidate>
-      <label for="msgText">Leave an anonymous message. No name or account is attached.</label>
+      <label for="msgText">Leave an anonymous message. No name or account is attached. Messages appear live on this page as Anon plus a number, and if I reply, my reply is shown too.</label>
       <textarea id="msgText" maxlength="500" rows="6"></textarea>
       <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" id="msgHp" tabindex="-1" autocomplete="off"></label></div>
       <div class="msg-row">
@@ -342,6 +451,9 @@
       </div>
       <p class="status" id="msgStatus" role="status" aria-live="polite"></p>
     </form>
+    <div class="replies-wrap">
+      <button class="tab" type="button" id="repliesTab" aria-haspopup="dialog"><span id="repliesTitle">Replies</span><svg class="expand" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+    </div>
   </section>
 
   <section class="inbox" id="inbox" hidden aria-label="Inbox">
@@ -365,6 +477,21 @@
     <span class="status" id="ownerStatus" role="status" aria-live="polite"></span>
   </form>
 </footer>
+
+<dialog class="replies" id="repliesDialog" aria-labelledby="repliesHeading">
+  <div class="replies-head">
+    <h2 id="repliesHeading">Replies</h2>
+    <button class="close" type="button" id="repliesClose">Close</button>
+  </div>
+  <div class="replies-body"><div class="replies-list" id="repliesList"></div></div>
+</dialog>
+
+<a class="send float-msg" id="floatMsg" href="#messages">Leave a message</a>
+
+<aside class="stream" id="stream" aria-hidden="true">
+  <div class="stream-head"><span class="dot"></span><span>Live</span></div>
+  <div class="stream-list" id="streamList"></div>
+</aside>
 
 
 <script>
@@ -462,6 +589,7 @@
         msgCount.textContent = '0 / 500';
         try { localStorage.setItem('lastMsg', String(Date.now())); } catch (err) {}
         msgStatus.textContent = 'Sent. Thank you.';
+        pollChat(false);
       })
       .catch(function () { msgStatus.textContent = 'Could not send. Try again in a moment.'; })
       .then(function () { msgSend.disabled = false; });
@@ -537,18 +665,152 @@
     }
     rows.forEach(function (m) {
       var a = document.createElement('article'); a.className = 'msg';
+
+      var head = document.createElement('div'); head.className = 'msg-head';
       var t = document.createElement('time'); t.dateTime = m.created_at; t.textContent = new Date(m.created_at).toLocaleString();
+      head.appendChild(t);
+      if (m.reply) { var tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = 'Answered'; head.appendChild(tag); }
+
       var p = document.createElement('p'); p.textContent = m.body;
-      var b = document.createElement('button'); b.type = 'button'; b.textContent = 'Delete';
-      b.addEventListener('click', function () {
-        b.disabled = true;
-        sb('/rest/v1/messages?id=eq.' + encodeURIComponent(m.id), { method: 'DELETE', headers: { Prefer: 'return=minimal' } }, token)
-          .then(loadInbox, loadInbox);
+
+      var box = document.createElement('textarea');
+      box.className = 'reply-box'; box.rows = 3; box.maxLength = 1000;
+      box.placeholder = 'Write a reply. It will be shown publicly with this message.';
+      box.setAttribute('aria-label', 'Reply to this message');
+      box.value = m.reply || '';
+
+      var actions = document.createElement('div'); actions.className = 'msg-actions';
+      var save = document.createElement('button'); save.type = 'button'; save.textContent = m.reply ? 'Update reply' : 'Publish reply';
+      var note = document.createElement('span'); note.className = 'note';
+      actions.appendChild(save);
+
+      function change(btn, fields) {
+        btn.disabled = true; note.textContent = 'Saving...';
+        patchMsg(m.id, fields).then(function () { loadInbox(); loadReplies(); },
+                                    function () { btn.disabled = false; note.textContent = 'Could not save.'; });
+      }
+      save.addEventListener('click', function () {
+        var text = box.value.trim();
+        if (!text) { note.textContent = 'Write a reply first.'; return; }
+        change(save, { reply: text, replied_at: new Date().toISOString() });
       });
-      a.appendChild(t); a.appendChild(p); a.appendChild(b);
+
+      if (m.reply) {
+        var unpub = document.createElement('button'); unpub.type = 'button'; unpub.textContent = 'Unpublish';
+        unpub.addEventListener('click', function () { change(unpub, { reply: null, replied_at: null }); });
+        actions.appendChild(unpub);
+      }
+
+      var del = document.createElement('button'); del.type = 'button'; del.textContent = 'Delete';
+      del.addEventListener('click', function () {
+        del.disabled = true;
+        sb('/rest/v1/messages?id=eq.' + encodeURIComponent(m.id), { method: 'DELETE', headers: { Prefer: 'return=minimal' } }, token)
+          .then(function () { loadInbox(); loadReplies(); }, loadInbox);
+      });
+      actions.appendChild(del);
+      actions.appendChild(note);
+
+      a.appendChild(head); a.appendChild(p); a.appendChild(box); a.appendChild(actions);
       inboxList.appendChild(a);
     });
   }
+
+  function patchMsg(id, fields) {
+    return sb('/rest/v1/messages?id=eq.' + encodeURIComponent(id),
+              { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(fields) }, token)
+      .then(function (r) { if (!r.ok) throw new Error(r.status); });
+  }
+
+  // ---------- Public replies: a tab that opens full screen ----------
+  var repliesTab = $('repliesTab'), repliesTitle = $('repliesTitle'), repliesDialog = $('repliesDialog'),
+      repliesList = $('repliesList'), repliesClose = $('repliesClose');
+
+  function loadReplies() {
+    if (!ready) return;
+    sb('/rest/v1/messages?select=id,body,reply,replied_at&reply=not.is.null&order=replied_at.desc&limit=100')
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(renderReplies)
+      .catch(function () {});
+  }
+
+  function renderReplies(rows) {
+    repliesTitle.textContent = 'Replies (' + rows.length + ')';
+    repliesList.textContent = '';
+    if (!rows.length) {
+      var e = document.createElement('p'); e.className = 'replies-empty'; e.textContent = 'No replies yet.';
+      repliesList.appendChild(e);
+      return;
+    }
+    rows.forEach(function (m) {
+      var qa = document.createElement('article'); qa.className = 'qa';
+      var q = document.createElement('p'); q.className = 'q'; q.textContent = m.body;
+      var a = document.createElement('p'); a.className = 'a'; a.textContent = m.reply;
+      var t = document.createElement('time'); t.dateTime = m.replied_at; t.textContent = 'Replied ' + new Date(m.replied_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      qa.appendChild(q); qa.appendChild(a); qa.appendChild(t);
+      repliesList.appendChild(qa);
+    });
+  }
+
+  repliesTab.addEventListener('click', function () {
+    if (repliesDialog.showModal) { repliesDialog.showModal(); } else { repliesDialog.setAttribute('open', ''); }
+    document.documentElement.classList.add('lock');
+    repliesDialog.querySelector('.replies-body').scrollTop = 0;
+  });
+  repliesClose.addEventListener('click', function () { repliesDialog.close(); });
+  repliesDialog.addEventListener('close', function () { document.documentElement.classList.remove('lock'); repliesTab.focus(); });
+
+  loadReplies();
+
+  // ---------- Make leaving a message easy to find ----------
+  var floatMsg = $('floatMsg'), ctaMsg = $('ctaMsg'), messagesSection = $('messages');
+  document.querySelectorAll('a[href="#messages"]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      setTimeout(function () { msgText.focus({ preventScroll: true }); }, calm ? 0 : 700);
+    });
+  });
+  var seenCta = true, seenMsgs = false;
+  function syncFloat() { floatMsg.classList.toggle('show', !seenCta && !seenMsgs); }
+  new IntersectionObserver(function (e) { seenCta = e[0].isIntersecting; syncFloat(); }).observe(ctaMsg);
+  new IntersectionObserver(function (e) { seenMsgs = e[0].isIntersecting; syncFloat(); }, { threshold: 0.15 }).observe(messagesSection);
+
+  // ---------- Live message stream ----------
+  var streamList = $('streamList'), lastId = 0, chatBusy = false, KEEP_MS = 20000;
+
+  function chatLabel(id) { return 'Anon' + String(id % 100).padStart(2, '0'); }
+
+  function addChat(m) {
+    var c = document.createElement('div'); c.className = 'chat';
+    var w = document.createElement('span'); w.className = 'who'; w.textContent = chatLabel(m.id);
+    var t = document.createElement('p'); t.className = 'txt'; t.textContent = m.body;
+    c.appendChild(w); c.appendChild(t);
+    streamList.appendChild(c);
+    while (streamList.children.length > 6) streamList.removeChild(streamList.firstChild);
+    setTimeout(function () {
+      c.classList.add('out');
+      setTimeout(function () { if (c.parentNode) c.parentNode.removeChild(c); }, 650);
+    }, KEEP_MS);
+  }
+
+  function pollChat(first) {
+    if (!ready || chatBusy) return;
+    chatBusy = true;
+    var q = first
+      ? '/rest/v1/messages?select=id,body&order=id.desc&limit=5'
+      : '/rest/v1/messages?select=id,body&id=gt.' + lastId + '&order=id.asc&limit=20';
+    sb(q)
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        if (first) rows.reverse();
+        rows.forEach(function (m, i) {
+          lastId = Math.max(lastId, m.id);
+          setTimeout(function () { addChat(m); }, i * 700);
+        });
+      })
+      .catch(function () {})
+      .then(function () { chatBusy = false; });
+  }
+  pollChat(true);
+  setInterval(function () { if (!document.hidden) pollChat(false); }, 5000);
 </script>
 </body>
 </html>
