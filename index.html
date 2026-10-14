@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Black Star</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #000000;
+    --graphite: #1c1c1c;
+    --smoke: #6d6d6d;
+    --ash: #d6d6d6;
+    --blood: #b3141b;
+    --max: 1180px;
+    --pad: clamp(1rem, 4vw, 2.5rem);
+    color-scheme: dark;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 4rem); scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--black);
+    color: var(--ash);
+    font-family: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+  ::selection { background: var(--blood); color: #fff; }
+
+  /* Film grain over everything */
+  .grain {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    opacity: .085; pointer-events: none; z-index: 20;
+    mix-blend-mode: screen;
+  }
+
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--blood); outline-offset: 4px; }
+
+  /* ---------- Top bar ---------- */
+  .bar {
+    max-width: var(--max); margin: 0 auto;
+    padding: 1.1rem var(--pad);
+    display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+  }
+  .bar .who { font-family: "Shippori Mincho", serif; font-weight: 700; letter-spacing: .06em; text-decoration: none; }
+  .bar nav { display: flex; gap: 1.6rem; }
+  .bar nav a { text-decoration: none; color: var(--smoke); transition: color .15s; }
+  .bar nav a:hover { color: var(--ash); }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    max-width: var(--max); margin: 0 auto;
+    padding: 1rem var(--pad) 5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: end;
+    gap: 2rem;
+    position: relative;
+  }
+  .hero-copy { padding-bottom: 1.5rem; }
+  .hero h1 {
+    margin: 0 0 1.4rem;
+    font-family: "Shippori Mincho", "Yu Mincho", serif;
+    font-weight: 800;
+    font-size: clamp(3.4rem, 9.5vw, 7.6rem);
+    line-height: .95;
+    letter-spacing: -.025em;
+    color: var(--ash);
+  }
+  .hero h1 span { display: block; }
+  .hero h1 span + span { padding-left: 1.4ch; }
+  .hero p { margin: 0; max-width: 34ch; color: var(--smoke); font-size: 1.05rem; }
+  .hero p + p { margin-top: .8rem; }
+
+  .art { position: relative; aspect-ratio: 1 / 1; width: 100%; }
+  .art svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .art .kanji {
+    position: absolute; right: 0; top: 4%;
+    writing-mode: vertical-rl;
+    font-family: "Shippori Mincho", serif; font-weight: 700;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    letter-spacing: .35em;
+    color: var(--ash);
+  }
+  .hatch path { stroke: var(--ash); fill: none; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1;
+    animation: draw 1.3s cubic-bezier(.3,.7,.2,1) forwards; animation-delay: calc(var(--i) * 5ms + .15s); }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  /* ---------- Section frames ---------- */
+  section.block { max-width: var(--max); margin: 0 auto; padding: 4rem var(--pad); }
+  .block-head { display: flex; align-items: center; gap: 1.2rem; margin-bottom: 3rem; }
+  .block-head h2 {
+    margin: 0;
+    font-family: "Shippori Mincho", serif; font-weight: 700;
+    font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+    letter-spacing: .04em;
+    color: var(--ash);
+  }
+  .block-head::after { content: ""; flex: 1; height: 1px; background: var(--smoke); opacity: .6; }
+
+  /* ---------- Works: staggered panels ---------- */
+  .works { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 1.5rem; row-gap: 4.5rem; }
+  .work { margin: 0; }
+  .work:nth-child(1) { grid-column: 1 / 8; }
+  .work:nth-child(2) { grid-column: 9 / 13; margin-top: 8rem; }
+  .work:nth-child(3) { grid-column: 3 / 9; }
+
+  .cover {
+    position: relative; display: block; width: 100%;
+    aspect-ratio: 3 / 4;
+    background: var(--black);
+    border: 1px solid var(--smoke);
+    padding: 0; cursor: pointer; overflow: hidden;
+    font: inherit; color: inherit; text-decoration: none;
+  }
+  .work:nth-child(3) .cover { aspect-ratio: 4 / 3; }
+  .cover .art-fill { position: absolute; inset: 0; filter: brightness(.62); transition: filter .35s ease, transform .6s ease; }
+  .cover:hover .art-fill, .cover:focus-visible .art-fill { filter: brightness(1); transform: scale(1.025); }
+
+  /* Placeholder cover art: three different ink textures */
+  .a1 {
+    background:
+      radial-gradient(circle at 50% 34%, var(--black) 0 15%, transparent 15.4%),
+      repeating-linear-gradient(90deg, var(--ash) 0 1px, transparent 1px 6px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 45%, #000 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, #000 45%, #000 100%);
+  }
+  .a2 {
+    background:
+      repeating-linear-gradient(45deg, var(--ash) 0 1px, transparent 1px 7px),
+      repeating-linear-gradient(-45deg, var(--ash) 0 1px, transparent 1px 7px);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 70%, #000 10%, transparent 68%);
+            mask-image: radial-gradient(ellipse at 50% 70%, #000 10%, transparent 68%);
+  }
+  .a3 {
+    background:
+      repeating-linear-gradient(0deg, var(--ash) 0 1px, transparent 1px 4px),
+      var(--black);
+    -webkit-mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 85%);
+            mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 85%);
+  }
+
+  .work figcaption { padding-top: 1rem; display: grid; gap: .1rem; }
+  .work h3 {
+    margin: 0;
+    font-family: "Shippori Mincho", serif; font-weight: 700;
+    font-size: 1.5rem; letter-spacing: .03em; color: var(--ash);
+  }
+  .work .facts { color: var(--smoke); font-size: .95rem; }
+  .read {
+    justify-self: start; margin-top: .6rem; text-decoration: none; display: inline-block;
+    font: inherit; color: var(--ash);
+    background: none; border: 0; padding: 0 0 2px;
+    border-bottom: 1px solid var(--smoke);
+    cursor: pointer; transition: border-color .15s;
+  }
+  .read:hover { border-bottom-color: var(--blood); }
+
+  /* ---------- About ---------- */
+  .about { display: grid; grid-template-columns: 1fr 1.4fr; gap: 3rem; align-items: start; }
+  .about .statement {
+    margin: 0;
+    font-family: "Shippori Mincho", serif; font-weight: 500;
+    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+    line-height: 1.6; color: var(--ash); max-width: 28em;
+  }
+  .about .detail { color: var(--smoke); max-width: 40ch; }
+  .about .detail p { margin: 0 0 1rem; }
+
+  /* ---------- Contact ---------- */
+  .contact { padding-bottom: 3rem; }
+  .contact p { margin: 0 0 .4rem; color: var(--smoke); }
+  .contact a {
+    font-family: "Shippori Mincho", serif; font-weight: 700;
+    font-size: clamp(1.4rem, 3.4vw, 2.2rem);
+    text-decoration: none; border-bottom: 1px solid var(--smoke); transition: border-color .15s;
+  }
+  .contact a:hover { border-bottom-color: var(--blood); }
+
+  footer { max-width: var(--max); margin: 0 auto; padding: 2rem var(--pad) 3rem; color: var(--smoke); font-size: .88rem; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(1.4rem + env(safe-area-inset-bottom, 0px));
+    transform: translate(-50%, 160%);
+    background: var(--black); color: var(--ash);
+    border: 1px solid var(--smoke);
+    padding: .6rem 1.2rem;
+    transition: transform .25s ease; z-index: 30;
+  }
+  .toast.show { transform: translate(-50%, 0); }
+
+  /* ---------- Anonymous messages ---------- */
+  .msg-form { max-width: 560px; display: grid; gap: .9rem; }
+  .msg-form label { color: var(--smoke); }
+  .msg-form textarea {
+    width: 100%; min-height: 9rem; resize: vertical;
+    background: var(--black); color: var(--ash);
+    border: 1px solid var(--smoke); border-radius: 0;
+    padding: .9rem 1rem; font: inherit; line-height: 1.6;
+  }
+  .msg-form textarea:focus-visible, .owner-form input:focus-visible { outline: 2px solid var(--blood); outline-offset: 2px; }
+  .msg-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+  .count { color: var(--smoke); font-size: .9rem; }
+  .send {
+    font: inherit; font-family: "Shippori Mincho", serif; font-weight: 700; font-size: 1.1rem;
+    color: var(--black); background: var(--ash);
+    border: 1px solid var(--ash); border-radius: 0;
+    padding: .55rem 1.6rem; cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .send:hover { background: var(--blood); border-color: var(--blood); color: #fff; }
+  .send:disabled { opacity: .5; cursor: default; }
+  .send.small { font-size: .95rem; padding: .45rem 1.1rem; }
+  .status { margin: 0; min-height: 1.6em; color: var(--ash); }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  /* Owner inbox: a tab that expands */
+  .inbox { max-width: var(--max); margin: 0 auto; padding: 0 var(--pad) 2rem; }
+  .tab {
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    background: var(--black); color: var(--ash);
+    border: 1px solid var(--smoke); border-radius: 0;
+    padding: 1rem 1.2rem; cursor: pointer; text-align: left;
+    font: inherit; font-family: "Shippori Mincho", serif; font-weight: 700; font-size: 1.2rem;
+    transition: border-color .15s;
+  }
+  .tab:hover { border-color: var(--ash); }
+  .tab .chev { transition: transform .25s ease; }
+  .tab[aria-expanded="true"] .chev { transform: rotate(180deg); }
+  .drawer { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s ease; }
+  .drawer.open { grid-template-rows: 1fr; }
+  .drawer-clip { overflow: hidden; min-height: 0; }
+  .tools { display: flex; gap: 1.2rem; padding: .8rem 1.2rem; border: 1px solid var(--smoke); border-top: 0; border-bottom-color: var(--graphite); }
+  .tools button, .msg button {
+    background: none; border: 0; border-bottom: 1px solid var(--smoke);
+    color: var(--smoke); font: inherit; font-size: .88rem; cursor: pointer; padding: 0 0 1px;
+  }
+  .tools button:hover, .msg button:hover { color: var(--ash); border-bottom-color: var(--blood); }
+  .list { border: 1px solid var(--smoke); border-top: 0; max-height: 60vh; overflow: auto; }
+  .msg { padding: 1.1rem 1.2rem; border-bottom: 1px solid var(--graphite); }
+  .msg:last-child { border-bottom: 0; }
+  .msg time { display: block; color: var(--smoke); font-size: .88rem; margin-bottom: .3rem; }
+  .msg p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ash); }
+  .msg button { margin-top: .7rem; }
+  .empty { padding: 1.2rem; color: var(--smoke); }
+
+  .owner-link { background: none; border: 0; padding: 0; margin-left: 1rem; color: var(--smoke); font: inherit; cursor: pointer; text-decoration: underline; }
+  .owner-link:hover { color: var(--ash); }
+  .owner-form { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-top: 1rem; }
+  .owner-form[hidden] { display: none; }
+  .owner-form input {
+    background: var(--black); color: var(--ash);
+    border: 1px solid var(--smoke); border-radius: 0;
+    padding: .5rem .7rem; font: inherit;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .drawer, .tab .chev, .send, .tab { transition: none; }
+  }
+
+  @media (max-width: 800px) {
+    .hero { grid-template-columns: 1fr; padding-bottom: 3rem; }
+    .art { order: -1; max-width: 520px; margin: 0 auto; }
+    .works { grid-template-columns: 1fr; row-gap: 3.5rem; }
+    .work:nth-child(n) { grid-column: 1 / -1; margin-top: 0; }
+    .about { grid-template-columns: 1fr; gap: 1.6rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hatch path { animation: none; stroke-dashoffset: 0; }
+    .cover .art-fill, .toast, .bar nav a { transition: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<svg class="grain" aria-hidden="true"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+
+<header class="bar">
+  <a class="who" href="#top">Black Star</a>
+  <nav aria-label="Sections">
+    <a href="#about">About</a>
+    <a href="#messages">Messages</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero" aria-label="Introduction">
+    <div class="hero-copy">
+      <h1><span>Black</span><span>Star</span></h1>
+      <p>By Jordan. A quiet corner of the internet.</p>
+      <p>Dark, still, and unhurried.</p>
+    </div>
+    <div class="art">
+      <svg viewBox="0 0 600 600" role="img" aria-label="A black eclipse ringed by a thin red crescent, surrounded by ink hatching">
+        <defs>
+          <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence id="turbBig" type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="4" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="12"/>
+          </filter>
+          <filter id="roughLine" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence id="turbLine" type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="9" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/>
+          </filter>
+        </defs>
+        <g class="hatch" id="hatch" filter="url(#roughLine)"></g>
+        <g filter="url(#rough)">
+          <circle cx="300" cy="300" r="132" fill="var(--blood)"/>
+          <circle id="shade" cx="286" cy="292" r="128" fill="var(--black)"/>
+        </g>
+      </svg>
+      <div class="kanji" aria-hidden="true">黒星</div>
+    </div>
+  </section>
+
+  <section class="block" id="about" aria-labelledby="about-h">
+    <div class="block-head"><h2 id="about-h">About</h2></div>
+    <div class="about">
+      <p class="statement">Nothing loud here. Just a dark room, a few words, and some ink.</p>
+      <div class="detail">
+        <p>Most of what's here is quiet on purpose.</p>
+        <p>More will be added soon.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="messages" aria-labelledby="messages-h">
+    <div class="block-head"><h2 id="messages-h">Messages</h2></div>
+    <form class="msg-form" id="msgForm" novalidate>
+      <label for="msgText">Leave an anonymous message. No name or account is attached.</label>
+      <textarea id="msgText" maxlength="500" rows="6"></textarea>
+      <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" id="msgHp" tabindex="-1" autocomplete="off"></label></div>
+      <div class="msg-row">
+        <span class="count" id="msgCount">0 / 500</span>
+        <button class="send" type="submit" id="msgSend">Send</button>
+      </div>
+      <p class="status" id="msgStatus" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <section class="inbox" id="inbox" hidden aria-label="Inbox">
+    <button class="tab" type="button" id="inboxTab" aria-expanded="false" aria-controls="inboxDrawer"><span id="inboxTitle">Messages</span><span class="chev" aria-hidden="true">&#9662;</span></button>
+    <div class="drawer" id="inboxDrawer">
+      <div class="drawer-clip" id="inboxClip" inert>
+        <div class="tools"><button type="button" id="refreshBtn">Refresh</button><button type="button" id="signOutBtn">Sign out</button></div>
+        <div class="list" id="inboxList"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Placeholder text. Replace it with your own.</span>
+  <button class="owner-link" id="ownerBtn" type="button">Owner</button>
+  <form class="owner-form" id="ownerForm" hidden>
+    <input type="email" id="ownerEmail" placeholder="Email" autocomplete="username" required>
+    <input type="password" id="ownerPass" placeholder="Password" autocomplete="current-password" required>
+    <button class="send small" type="submit">Sign in</button>
+    <span class="status" id="ownerStatus" role="status" aria-live="polite"></span>
+  </form>
+</footer>
+
+
+<script>
+  // Seeded random so the hatching is the same every load
+  function rng(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  var rand = rng(1987);
+  var g = document.getElementById('hatch');
+  var NS = 'http://www.w3.org/2000/svg';
+  var N = 260, cx = 300, cy = 300;
+  for (var i = 0; i < N; i++) {
+    var ang = (i / N) * Math.PI * 2 + (rand() - .5) * .04;
+    var r1 = 142 + rand() * 26;
+    var r2 = r1 + 18 + Math.pow(rand(), 2.2) * 150;
+    var p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', 'M' + (cx + Math.cos(ang) * r1).toFixed(1) + ' ' + (cy + Math.sin(ang) * r1).toFixed(1) +
+                        ' L' + (cx + Math.cos(ang) * r2).toFixed(1) + ' ' + (cy + Math.sin(ang) * r2).toFixed(1));
+    p.setAttribute('pathLength', '1');
+    p.setAttribute('stroke-width', (0.5 + rand() * 1.3).toFixed(2));
+    p.setAttribute('opacity', (0.45 + rand() * 0.55).toFixed(2));
+    p.style.setProperty('--i', i);
+    g.appendChild(p);
+  }
+
+  var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!calm) {
+    // Ink boil: the filter noise re-seeds a few times a second, like redrawn animation frames
+    var turbBig = document.getElementById('turbBig'), turbLine = document.getElementById('turbLine');
+    var seedsBig = [4, 11, 7, 19], seedsLine = [9, 2, 15, 6], frame = 0, onScreen = true;
+    new IntersectionObserver(function (e) { onScreen = e[0].isIntersecting; }).observe(document.querySelector('.art'));
+    setTimeout(function () {
+      setInterval(function () {
+        if (!onScreen || document.hidden) return;
+        frame = (frame + 1) % 4;
+        turbBig.setAttribute('seed', seedsBig[frame]);
+        turbLine.setAttribute('seed', seedsLine[frame]);
+      }, 150);
+    }, 2800); // after the hatching has finished drawing in
+
+    // The red crescent turns to face the cursor
+    var shade = document.getElementById('shade'), art = document.querySelector('.art');
+    var cur = { x: 0.868, y: 0.496 }, aim = { x: 0.868, y: 0.496 }, running = false, REACH = 16;
+    function step() {
+      cur.x += (aim.x - cur.x) * 0.08;
+      cur.y += (aim.y - cur.y) * 0.08;
+      shade.setAttribute('cx', (300 - cur.x * REACH).toFixed(2));
+      shade.setAttribute('cy', (300 - cur.y * REACH).toFixed(2));
+      if (Math.abs(aim.x - cur.x) + Math.abs(aim.y - cur.y) > 0.002) { requestAnimationFrame(step); } else { running = false; }
+    }
+    function go() { if (!running) { running = true; requestAnimationFrame(step); } }
+    window.addEventListener('pointermove', function (e) {
+      var r = art.getBoundingClientRect();
+      var dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      var len = Math.hypot(dx, dy) || 1;
+      aim.x = dx / len; aim.y = dy / len;
+      go();
+    });
+    document.documentElement.addEventListener('mouseleave', function () { aim.x = 0.868; aim.y = 0.496; go(); });
+  }
+
+  // ---------- Anonymous messages (Supabase) ----------
+  // Paste your project URL and anon (public) key from Supabase > Project Settings > API.
+  var SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+  var SUPABASE_KEY = 'YOUR-ANON-KEY';
+  var ready = SUPABASE_URL.indexOf('YOUR-PROJECT') === -1 && SUPABASE_KEY.indexOf('YOUR-ANON-KEY') === -1;
+  var token = null;
+
+  function sb(path, opts, auth) {
+    opts = opts || {};
+    var h = { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' };
+    if (auth) h.Authorization = 'Bearer ' + auth;
+    if (opts.headers) { for (var k in opts.headers) h[k] = opts.headers[k]; }
+    opts.headers = h;
+    return fetch(SUPABASE_URL + path, opts);
+  }
+  function $(id) { return document.getElementById(id); }
+
+  // Visitor form
+  var msgText = $('msgText'), msgCount = $('msgCount'), msgSend = $('msgSend'), msgStatus = $('msgStatus'), msgHp = $('msgHp');
+  msgText.addEventListener('input', function () { msgCount.textContent = msgText.value.length + ' / 500'; });
+  $('msgForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var text = msgText.value.trim();
+    if (!text) { msgStatus.textContent = 'Write something first.'; return; }
+    if (msgHp.value) { msgText.value = ''; msgStatus.textContent = 'Sent. Thank you.'; return; } // bots fill the hidden field
+    if (!ready) { msgStatus.textContent = 'Messages are not connected yet.'; return; }
+    var last = 0;
+    try { last = +localStorage.getItem('lastMsg') || 0; } catch (err) {}
+    if (Date.now() - last < 30000) { msgStatus.textContent = 'Wait a few seconds before sending another.'; return; }
+    msgSend.disabled = true;
+    msgStatus.textContent = 'Sending...';
+    sb('/rest/v1/messages', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ body: text }) })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.status);
+        msgText.value = '';
+        msgCount.textContent = '0 / 500';
+        try { localStorage.setItem('lastMsg', String(Date.now())); } catch (err) {}
+        msgStatus.textContent = 'Sent. Thank you.';
+      })
+      .catch(function () { msgStatus.textContent = 'Could not send. Try again in a moment.'; })
+      .then(function () { msgSend.disabled = false; });
+  });
+
+  // Owner sign-in and inbox
+  var ownerBtn = $('ownerBtn'), ownerForm = $('ownerForm'), ownerEmail = $('ownerEmail'), ownerPass = $('ownerPass'), ownerStatus = $('ownerStatus');
+  var inbox = $('inbox'), inboxTab = $('inboxTab'), inboxTitle = $('inboxTitle'), inboxDrawer = $('inboxDrawer'), inboxClip = $('inboxClip'), inboxList = $('inboxList');
+
+  function setOpen(open) {
+    inboxTab.setAttribute('aria-expanded', String(open));
+    inboxDrawer.classList.toggle('open', open);
+    inboxClip.inert = !open;
+  }
+  inboxTab.addEventListener('click', function () { setOpen(inboxTab.getAttribute('aria-expanded') !== 'true'); });
+
+  ownerBtn.addEventListener('click', function () {
+    ownerForm.hidden = !ownerForm.hidden;
+    if (!ownerForm.hidden) ownerEmail.focus();
+  });
+
+  ownerForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!ready) { ownerStatus.textContent = 'Not connected yet.'; return; }
+    ownerStatus.textContent = 'Signing in...';
+    sb('/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email: ownerEmail.value.trim(), password: ownerPass.value }) })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (x) {
+        if (!x.ok || !x.d.access_token) throw new Error('auth');
+        token = x.d.access_token; // kept in memory only
+        ownerPass.value = '';
+        ownerForm.hidden = true;
+        ownerBtn.hidden = true;
+        ownerStatus.textContent = '';
+        inbox.hidden = false;
+        loadInbox();
+        inbox.scrollIntoView({ block: 'center' });
+      })
+      .catch(function () { ownerStatus.textContent = 'Sign-in failed.'; });
+  });
+
+  function signOut() {
+    token = null;
+    setOpen(false);
+    inbox.hidden = true;
+    ownerBtn.hidden = false;
+    inboxList.textContent = '';
+  }
+  $('signOutBtn').addEventListener('click', signOut);
+  $('refreshBtn').addEventListener('click', loadInbox);
+
+  function loadInbox() {
+    if (!token) return;
+    sb('/rest/v1/messages?select=id,body,created_at&order=created_at.desc&limit=200', {}, token)
+      .then(function (r) {
+        if (r.status === 401) { signOut(); throw new Error('expired'); }
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
+      .then(renderInbox)
+      .catch(function () { if (token) inboxList.textContent = 'Could not load messages.'; });
+  }
+
+  function renderInbox(rows) {
+    inboxTitle.textContent = 'Messages (' + rows.length + ')';
+    inboxList.textContent = '';
+    if (!rows.length) {
+      var empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'No messages yet.';
+      inboxList.appendChild(empty);
+      return;
+    }
+    rows.forEach(function (m) {
+      var a = document.createElement('article'); a.className = 'msg';
+      var t = document.createElement('time'); t.dateTime = m.created_at; t.textContent = new Date(m.created_at).toLocaleString();
+      var p = document.createElement('p'); p.textContent = m.body;
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = 'Delete';
+      b.addEventListener('click', function () {
+        b.disabled = true;
+        sb('/rest/v1/messages?id=eq.' + encodeURIComponent(m.id), { method: 'DELETE', headers: { Prefer: 'return=minimal' } }, token)
+          .then(loadInbox, loadInbox);
+      });
+      a.appendChild(t); a.appendChild(p); a.appendChild(b);
+      inboxList.appendChild(a);
+    });
+  }
+</script>
+</body>
+</html>
